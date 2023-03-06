@@ -27,10 +27,10 @@ jobs:
       - name: Check the code into Go module directory
         uses: actions/checkout@v3
 
-      - name: Install GOlang-migrate
+      - name: Install Golang-migrate
         run: |
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.darwin-amd64.tar.gz | tar xvz
-          sudo mv migrate.linux-amd64 /usr/bin
+          sudo mv migrate.linux-amd64 /usr/bin/migrate
           which migrate
 
       - name: Set up Go
