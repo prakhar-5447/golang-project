@@ -1,16 +1,34 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
+	"log"
+
+	_ "github.com/lib/pq"
+	"github.com/prakhar-5447/golang-project/api"
+	db "github.com/prakhar-5447/golang-project/db/sqlc"
+	"github.com/prakhar-5447/golang-project/util"
 )
 
 func main() {
-	fmt.Println("Hello World")
-	fmt.Println(add(5, 10))
-}
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config: ", err)
+	}
 
-func add(x int, y int) int {
-	var a = x
-	var b = y
-	return a + b
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
+	if err != nil {
+		log.Fatal("cannot connect to db: ", err)
+	}
+
+	store := db.NewStore(conn)
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server:", err)
+	}
+
+	err = server.Start(config.ServerAddress)
+	if err != nil {
+		log.Fatal("cannot start server:", err)
+	}
 }

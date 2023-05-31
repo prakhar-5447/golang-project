@@ -1,6 +1,9 @@
 postgres:
 	docker run --name postgres15 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=root -d postgres:15-alpine
 
+start:
+	docker start postgres15
+
 createdb:
 	docker exec -it postgres15 createdb --username=root --owner=root golang_project
 
@@ -12,6 +15,12 @@ migrateup:
 	
 migratedown:
 	migrate -path db/migration -database "postgresql://root:root@localhost:5432/golang_project?sslmode=disable" -verbose down
+	
+migrateup1:
+	migrate -path db/migration -database "postgresql://root:root@localhost:5432/golang_project?sslmode=disable" -verbose up 1
+	
+migratedown1:
+	migrate -path db/migration -database "postgresql://root:root@localhost:5432/golang_project?sslmode=disable" -verbose down 1
 
 sqlc:
 	sqlc generate
@@ -22,4 +31,11 @@ dockersqlc:
 test:
 	go test -v -cover ./... 
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc dockersqlc test
+server:
+	go run main.go
+
+mock:
+	mockgen --build_flags=--mod=mod -package mockdb -destination db/mock/store.go  github.com/prakhar-5447/golang-project/db/sqlc Store
+
+
+.PHONY: postgres start createdb dropdb migrateup migratedown migrateup1 migratedown1 sqlc dockersqlc test server mock
